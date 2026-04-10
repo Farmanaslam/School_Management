@@ -9,10 +9,26 @@ const taskRoutes = require("./routes/taskRoutes");
 
 const app = express();
 
-app.use(cors({ origin: process.env.CLIENT_URL || "http://localhost:3000" }));
+// ✅ Replace the old cors line with this
+const allowedOrigins = [
+  "http://localhost:3000",
+  "https://school-management-psi-vert.vercel.app",
+];
+
+app.use(cors({
+  origin: function (origin, callback) {
+    if (!origin) return callback(null, true);
+    if (allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error("Not allowed by CORS"));
+    }
+  },
+  credentials: true,
+}));
+
 app.use(express.json());
 
-// health check
 app.get("/", (req, res) => res.json({ msg: "School API running" }));
 
 app.use("/api/auth", authRoutes);
